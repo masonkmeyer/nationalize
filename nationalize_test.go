@@ -101,3 +101,20 @@ func TestShouldOverrideDefaults(t *testing.T) {
 	_, _, err := client.Predict("michael")
 	assert.NotNil(t, err)
 }
+
+func TestShouldReturnBatchResults(t *testing.T) {
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusOK)
+		names := r.URL.Query()["name[]"]
+		assert.NotNil(t, names)
+		assert.Len(t, names, 3)
+		w.Write([]byte(`[{"name":"michael","country":[{"country_id":"US","probability":0.08986482266532715},{"country_id":"AU","probability":0.05976757527083082},{"country_id":"NZ","probability":0.04666974820852911}]},{"name":"matthew","country":[{"country_id":"US","probability":0.23117379187666118},{"country_id":"AU","probability":0.21104716641125307},{"country_id":"NZ","probability":0.16699309208074417}]},{"name":"jane","country":[{"country_id":"LR","probability":0.08708128063678007},{"country_id":"KE","probability":0.0763087780134742},{"country_id":"CN","probability":0.04713115986309489}]}]`))
+	}))
+	defer server.Close()
+
+	client := NewClient(WithUrl(server.URL))
+	result, _, err := client.BatchPredict([]string{"michael", "matthew", "jane"})
+	assert.Nil(t, err)
+
+	assert.Len(t, result, 3)
+}

@@ -120,7 +120,7 @@ func (client *Client) Predict(name string) (*Prediction, *RateLimit, error) {
 	return &prediction, rateLimit, nil
 }
 
-func (client *Client) BatchPredict(names []string) (*[]Prediction, *RateLimit, error) {
+func (client *Client) BatchPredict(names []string) ([]Prediction, *RateLimit, error) {
 	url, _ := url.Parse(client.baseUrl)
 	values := url.Query()
 
@@ -146,7 +146,7 @@ func (client *Client) BatchPredict(names []string) (*[]Prediction, *RateLimit, e
 		return nil, rateLimit, err
 	}
 
-	return &predictions, rateLimit, nil
+	return predictions, rateLimit, nil
 }
 
 // get makes the API request and returns the response body
